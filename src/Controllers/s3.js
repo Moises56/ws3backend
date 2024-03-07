@@ -1,13 +1,13 @@
 import { S3Client, PutObjectCommand, ListObjectsCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
-import { AWS_BUCKET_REGION, AWS_PUBLIC_KEY, AWS_SECRET_KEY, AWS_BUCKET_NAME } from '../config.js'
+import { AWSREGION, AWS_PUBLIC, AWSKEY, AWSNAME } from '../config.js'
 import fs from 'fs'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 
 const client = new S3Client({
-    region: AWS_BUCKET_REGION,
+    region: AWSREGION,
     credentials: {
-        accessKeyId: AWS_PUBLIC_KEY,
-        secretAccessKey: AWS_SECRET_KEY
+        accessKeyId: AWS_PUBLIC,
+        secretAccessKey: AWSKEY
     }
 })
 
@@ -15,7 +15,7 @@ export async function uploadFile(file) {
     console.log("file S3: ", file)
     const stream = fs.createReadStream(file.tempFilePath)
     const uploadParams = {
-        Bucket: AWS_BUCKET_NAME,
+        Bucket: AWSNAME,
         Key: file.name, //nombre del archivo
         Body: stream,
         ACL: 'public-read',
@@ -29,14 +29,14 @@ export async function uploadFile(file) {
 
 export async function getFiles() {
     const command = new ListObjectsCommand({
-        Bucket: AWS_BUCKET_NAME
+        Bucket: AWSNAME
     })
     return await client.send(command)
 }
 
 export async function getFile(filename) {
     const command = new GetObjectCommand({
-        Bucket: AWS_BUCKET_NAME,
+        Bucket: AWSNAME,
         Key: filename
     })
     return await client.send(command)
@@ -44,7 +44,7 @@ export async function getFile(filename) {
 
 export async function downloadFile(filename) {
     const command = new GetObjectCommand({
-        Bucket: AWS_BUCKET_NAME,
+        Bucket: AWSNAME,
         Key: filename
     })
     const result = await client.send(command)
@@ -54,7 +54,7 @@ export async function downloadFile(filename) {
 
 export async function getFileURL(filename) {
     const command = new GetObjectCommand({
-        Bucket: AWS_BUCKET_NAME,
+        Bucket: AWSNAME,
         Key: filename
     })
     return await getSignedUrl(client, command, { expiresIn: 3600 })
@@ -63,7 +63,7 @@ export async function getFileURL(filename) {
 //eliminar archivo de s3 
 export async function deleteFile(filename) {
     const command = new DeleteObjectCommand({
-        Bucket: AWS_BUCKET_NAME,
+        Bucket: AWSNAME,
         Key: filename
     })
     return await client.send(command)
